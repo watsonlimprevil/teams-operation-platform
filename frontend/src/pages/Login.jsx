@@ -1,11 +1,11 @@
 import { useState } from "react";
 import api from "../api/axios";
-
+import { useNavigate } from "react-router-dom";
 export default function Login(){
     const [email , setEmail] = useState('');
     const [password , setPassword] = useState('');
     const [error , setError] = useState('');
-
+    const nav = useNavigate();
     async function handleLogin(){
         try{
             const res = await api.post('/auth/login' , {
@@ -43,7 +43,8 @@ export default function Login(){
 
             <br></br>
 
-            <button onClick={handleLogin}></button>
+            <button onClick={handleLogin}>Login</button>
+            <button onClick={()=> nav('/register')}>Dont have a account</button>
         </div>
     )
 }
