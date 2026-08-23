@@ -74,3 +74,13 @@ model Task {
   project    Project    @relation(fields: [projectId], references: [id])
   user       User?      @relation(fields: [assignedTo], references: [id])
 }
+
+model TeamMembership {
+  id        Int    @id @default(autoincrement())
+  userId    Int
+  teamId    Int
+  role      String @default("member") // "admin" or "member"
+
+  user      User   @relation(fields: [userId], references: [id])
+  team      Team   @relation(fields: [teamId], references: [id])
+}
