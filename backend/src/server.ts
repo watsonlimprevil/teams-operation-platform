@@ -4,7 +4,10 @@ import taskRoutes from './routes/task.routes'
 import teamMembershipRoutes from './routes/teamMembership.routes'
 import authRoutes from './routes/auth.routes';
 import { errorMiddleware } from "./middleware/error.middleware";
+import dasboardRoutes from './routes/dashboard.routes'
+import teamRoutes from './routes/team.routes'
 import cors from 'cors';
+
 
 
 const app = express();
@@ -17,6 +20,8 @@ app.use('/tasks' , taskRoutes)
 app.use("/projects", projectRoutes);
 app.use('/team-membership' , teamMembershipRoutes)
 app.use('/auth' , authRoutes);
+app.use('/dashboard' , dasboardRoutes);
+app.use('/teams', teamRoutes)
 app.use(errorMiddleware);
 
 app.listen(3001, () => console.log("Server running on port 3001"));

@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import prisma from "../prisma/client";
+import { prisma } from "../prisma/client";
 
 export const getDashboardData = async (req: Request, res: Response) => {
   try {
@@ -13,7 +13,7 @@ export const getDashboardData = async (req: Request, res: Response) => {
       },
     });
 
-    const teamIds = memberships.map(m => m.teamId);
+    const teamIds = memberships.map((m: any) => m.teamId);
 
     // Get all projects for those teams
     const projects = await prisma.project.findMany({
@@ -22,7 +22,7 @@ export const getDashboardData = async (req: Request, res: Response) => {
       },
     });
 
-    const projectIds = projects.map(p => p.id);
+    const projectIds = projects.map((p: any) => p.id);
 
     // Get all tasks for those projects
     const tasks = await prisma.task.findMany({
