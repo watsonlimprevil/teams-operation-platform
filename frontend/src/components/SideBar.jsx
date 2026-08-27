@@ -1,23 +1,48 @@
 import { Link } from "react-router-dom";
+import { useState } from "react";
 
-export default function Sidebar(){
-    return(
-        <div
+export default function Sidebar() {
+  const [collapsed, setCollapsed] = useState(false);
+
+  return (
+    <div
+      style={{
+        width: collapsed ? "70px" : "220px",
+        background: "#f5f5f5",
+        padding: "1rem",
+        height: "50vh",
+        borderRight: "1px solid #ddd",
+        transition: "width 0.2s ease"
+      }}
+    >
+      <button
+        onClick={() => setCollapsed(!collapsed)}
         style={{
-            width : '220px',
-            background : '#f5f5f5',
-            padding : '1rem',
-            height : '100vh',
-            borderRight : '1px solid #ddd'
+          marginBottom: "1rem",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          fontSize: "1.2rem"
         }}
-        >
-            <h3>TeamOps</h3>
-            <nav style={{marginTop : '2rem' , display :'flex', flexDirection: 'column', gap: '1rem'}}>
-                <Link to={'/dashboard'}>Dashboard</Link>
-                <Link to={'/teams'}>Teams</Link>
-                <Link to={'/projects'}>Projects</Link>
-                <Link to={'/tasks'}>Tasks</Link>
-            </nav>
-        </div>
-    )
+      >
+        {collapsed ? "➡️" : "⬅️"}
+      </button>
+
+      {!collapsed && <h3>TeamOps</h3>}
+
+      <nav
+        style={{
+          marginTop: "2rem",
+          display: "flex",
+          flexDirection: "column",
+          gap: "1rem"
+        }}
+      >
+        <Link to="/dashboard">{collapsed ? "🏠" : "Dashboard"}</Link>
+        <Link to="/teams">{collapsed ? "👥" : "Teams"}</Link>
+        <Link to="/projects">{collapsed ? "📁" : "Projects"}</Link>
+        <Link to="/tasks">{collapsed ? "📝" : "Tasks"}</Link>
+      </nav>
+    </div>
+  );
 }

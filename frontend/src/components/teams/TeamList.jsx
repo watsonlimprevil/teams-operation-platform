@@ -1,14 +1,17 @@
-import TeamCard from "./TeamCard";
+import { Link } from "react-router-dom";
 
 export default function TeamList({ teams }) {
-  if (!teams.length) {
-    return <p>No teams yet.</p>;
-  }
-
   return (
-    <div style={{ marginTop: "1rem" }}>
-      {teams.map((team) => (
-        <TeamCard key={team.id} team={team} />
+    <div>
+      {teams.map(team => (
+        <div key={team.id} style={{ marginBottom: "1rem" }}>
+          <h3>{team.name}</h3>
+          <p>Team ID: {team.id}</p>
+
+          <Link to={`/teams/${team.id}`}>
+            View Team
+          </Link>
+        </div>
       ))}
     </div>
   );
