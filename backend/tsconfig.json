@@ -18,7 +18,7 @@
     "skipLibCheck": true,
 
     // Allow TS to compile isolated files (good for Node)
-    "isolatedModules": true,
+    "isolatedModules": false,
 
     // Generate source maps for debugging
     "sourceMap": true
