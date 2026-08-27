@@ -1,12 +1,12 @@
 import { useState } from "react";
 import api from "../../api/axios";
 
-export default function AddProjectModal({onClose , onCreate}){
+export default function AddProjectModal({onClose , onCreate , teamId}){
     const [name , setName] = useState('');
 
     async function handleCreate(){
         try{
-            await api.post('/projects' , {name});
+            await api.post('/projects' , {name ,teamId});
             onCreate();
             onClose()
         }catch(error){
