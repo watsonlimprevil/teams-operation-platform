@@ -15,7 +15,7 @@ export default function Login(){
 
             localStorage.setItem('token', res.data.token);
 
-            window.location.href = '/dashboard';
+            nav('/dashboard')
         }catch(error){
             setError('Invalid email or password')
         }
