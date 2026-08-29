@@ -1,34 +1,55 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api/axios";
 import AddProjectModal from "../components/projects/AddProjectModal";
-import { useCallback } from "react";
+import RenameProjectModal from "./RenameProject";
 export default function TeamDetails() {
   const { teamId } = useParams();
 
   const [team, setTeam] = useState(null);
   const [members, setMembers] = useState([]);
   const [projects, setProjects] = useState([]);
-  const [showProjectModal , setShowProjectModal] = useState(false)
-
-const fetchTeamDetails = useCallback(async () => {
-  try {
-    const res = await api.get(`/teams/${teamId}`);
-    setTeam(res.data.team);
-    setMembers(res.data.members);
-    setProjects(res.data.projects);
-  } catch (err) {
-    console.log("Error loading team details");
-  }
-}, [teamId]);
-
+  const [showProjectModal, setShowProjectModal] = useState(false);
+  const [showRenameModal , setShowRenameModal] = useState(false);
+  const [renamed , setRenamed]= useState(null);
+  const fetchTeamDetails = useCallback(async () => {
+    try {
+      const res = await api.get(`/teams/${teamId}`);
+      setTeam(res.data.team);
+      setMembers(res.data.members);
+      setProjects(res.data.projects);
+    } catch (err) {
+      console.log("Error loading team details");
+    }
+  }, [teamId]);
 
   useEffect(() => {
     fetchTeamDetails();
-  }, [teamId]);
+  }, [fetchTeamDetails]);
 
   if (!team) {
     return <p style={{ padding: "2rem" }}>Loading team...</p>;
+  }
+
+  async function deleteProjects(id){
+    try{
+       await api.delete(`/projects/${id}`)
+       setProjects(prev => prev.filter(p=> p.id !==id))
+    }catch(error){
+      console.error('failed to delete project')
+    }
+  }
+
+  async function renameProject(id , title){
+    try{
+      const res = await api.put(`/projects/${id}` ,{name: title});
+      setProjects(prev => 
+        prev.map(p => (p.id ===id ? res.data : p) )
+      )
+      setShowRenameModal(false)
+    }catch(error){
+      console.error('unable to rename project', error)
+    }
   }
 
   return (
@@ -48,18 +69,30 @@ const fetchTeamDetails = useCallback(async () => {
 
       <h2>Projects</h2>
       {projects.map(p => (
-        <div key={p.id}>
-          {p.name}
+        <div key={p.id}>{p.name}
+        <button onClick={()=> deleteProjects(p.id)}>🗑️</button>
+        <button onClick={()=> {
+          setRenamed(p)
+          setShowRenameModal(true)
+        }}>Edit</button>
         </div>
       ))}
-      <button onClick={()=> setShowProjectModal(true)}> 
+      {showRenameModal && (
+        <RenameProjectModal 
+        renamed={renamed}
+        onRename={renameProject}
+        setShowRename={setShowRenameModal}
+        />
+      )}
+      <button onClick={() => setShowProjectModal(true)}>
         Create Project
       </button>
+
       {showProjectModal && (
-        <AddProjectModal 
-        teamId={teamId}
-        onClose={()=> setShowProjectModal(false)}
-        onCreated={fetchTeamDetails}
+        <AddProjectModal
+          teamId={Number(teamId)}
+          onClose={() => setShowProjectModal(false)}
+          onCreate={fetchTeamDetails}
         />
       )}
     </div>
