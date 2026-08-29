@@ -89,3 +89,69 @@ export const deleteTask = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Error deleting task" });
   }
 };
+
+
+export const getTasksByProject = async(req:Request , res:Response) =>{
+  try{
+    const projectId = Number(req.params.projectId);
+    const tasks = await prisma.task.findMany({
+      where:{projectId},
+      orderBy : {createdAt : 'asc'}
+    });
+    res.json(tasks)
+  }catch(error){
+    console.error('Error fetching project tasks', error)
+    res.status(500).json({message : 'Error fetching proect tasks.'})
+  };
+}
+
+export const createKanbanTask = async(req:Request , res:Response) =>{
+  try{
+    const {title , description , status , projectId} = req.body;
+
+    const task = await prisma.task.create({
+      data:{
+        title,
+        description,
+        status:status || 'pending',
+        projectId : Number(projectId)
+      }
+    });
+    res.json(task);
+  }catch(error){
+    console.error('Error creating kaban tasks', error);
+    res.status(500).json({message : 'Error creating kaban task'})
+  }
+};
+
+export const updateTaskStatus = async(req:Request , res:Response) =>{
+  try{
+    const id = Number(req.params.id);
+    const { status } = req.body;
+
+    const task = await prisma.task.update({
+      where: {id},
+      data: {status}
+    });
+    res.json(task)
+  }catch(error){
+    console.error('Error updating task status', error);
+    res.status(500).json({message :  'Error updating task status'})
+  }
+};
+
+export const renameTask= async(req:Request , res:Response)=>{
+  try{
+    const id = Number(req.params.id);
+    const { title} = req.body;
+
+    const task = await prisma.task.update({
+      where:{id},
+      data: {title}
+    });
+    res.json(task);
+  }catch(error){
+    console.error('Error renaming task', error)
+  }
+
+}
