@@ -1,58 +1,40 @@
 import { useState } from "react";
-import api from "../api/axios";
-import { useNavigate } from "react-router-dom";
+import { useAuth } from "../components/auth/useAuth";
+
 export default function Register(){
-    const [email, setEmail] = useState('');
+    const { register } = useAuth();
+    const [name , setName] = useState('');
+    const [email , setEmail] = useState('');
     const [password , setPassword] = useState('');
-    const [error , setError] = useState('');
-    const [success , setSuccess] = useState('');
-    const nav = useNavigate()
 
-    async function handleRegister(){
-        try{
-            const res = await api.post('/auth/register',{
-                email , password,
-            });
-
-            setSuccess('Account created successfully. You can now log in');
-           
-
-            setError('')
-        }catch(error){
-        setError('Registration failed. Try a different email.')
-        setSuccess('')
-        }
+    async function handleSubmit(e){
+        e.preventDefault();
+        await register(name , email , password)
     };
 
     return(
-        <div style={{padding : '2rem'}}>
-            <h1>Register</h1>
-            {error && <p style={{color : 'red'}}>{error}</p>}
+        <form onSubmit={handleSubmit}>
+            <h2>Register</h2>
 
-            {success && <div> 
-                <p style={{color : 'green'}}>{success}</p>
-                <button onClick={() => nav('/')}>Login</button>
-                </div>}
+            <input 
+            placeholder="name"
+            value={name}
+            onChange={(e)=> setName(e.target.value)}
+            />
 
             <input
             placeholder="Email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            type="email"
+            onChange={(e)=> setEmail(e.target.value)}
             />
-              <br /><br />
 
-              <input 
-              placeholder="Password"
-              type="password"
-              value={password}
-              onChange={(e)=> setPassword(e.target.value)}
-              />
-
-              <br /><br />
-
-              <button onClick={handleRegister}>Create Account</button>
-
-        </div>
+            <input 
+            placeholder="password"
+            type="password"
+            value={password}
+            onChange={e => setPassword(e.target.value)}
+            />
+            <button type="submit">Register</button>
+        </form>
     )
-
 }
