@@ -17,7 +17,7 @@ export default function TaskColumn({title , tasks , onMove , onRename , onDelete
                 key={task.id}
                 task={task}
                 onMove={onMove}
-                onRename={onRename}
+                setRename={onRename}
                 onDelete={onDelete}
                 />
             ))}

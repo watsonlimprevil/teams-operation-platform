@@ -1,4 +1,4 @@
-export default function TaskCard({ task, onMove, onRename, onDelete }) {
+export default function TaskCard({ task, onMove, setRename ,onDelete }) {
   return (
     <div
       style={{
@@ -39,10 +39,7 @@ export default function TaskCard({ task, onMove, onRename, onDelete }) {
         )}
 
         {/* Rename */}
-        <button onClick={() => {
-          const newTitle = prompt("Enter new title:");
-          if (newTitle) onRename(task.id, newTitle);
-        }}>
+        <button onClick={() => setRename(task)}>
           Rename
         </button>
 
