@@ -19,6 +19,8 @@ model User {
   createdAt       DateTime         @default(now())
   teams           UserTeam[]
   teamMemberships TeamMembership[]
+  tasks Task[]
+
 }
 
 
@@ -75,16 +77,22 @@ model Project {
 
 
 model Task {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   title       String
   description String?
-  status      String     @default("pending")
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  status      String   @default("pending")
+  completed   Boolean? @default(false)
 
-  teamId      Int?
-  team        Team?      @relation(fields: [teamId], references: [id])
+  projectId   Int
+  project     Project  @relation(fields: [projectId], references: [id])
 
-  projectId   Int?
-  project     Project?   @relation(fields: [projectId], references: [id])
+  teamId      Int       // ⭐ ADD THIS
+  team        Team      @relation(fields: [teamId], references: [id]) // ⭐ ADD THIS
+
+  assignedTo  Int?
+  user        User?     @relation(fields: [assignedTo], references: [id])
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 }
+
