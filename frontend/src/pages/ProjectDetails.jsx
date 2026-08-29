@@ -1,14 +1,19 @@
-
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api/axios";
 import TaskColumn from "../components/tasks/TaskColumn";
+import CreateTaskModal from "../components/tasks/CreateTaskModal";
+import RenameTaskModal from "../components/tasks/RenameTaskModal";
 
 export default function ProjectDetails() {
   const { projectId } = useParams();
 
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
+
+  // Modal state
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [renameTask, setRenameTask] = useState(null);
 
   useEffect(() => {
     fetchProject();
@@ -47,7 +52,7 @@ export default function ProjectDetails() {
 
   async function handleRenameTask(id, newTitle) {
     try {
-      await api.put(`/tasks/${id}/rename`, { title: newTitle });
+      await api.put(`/tasks/${id}`, { title: newTitle });
 
       setTasks(prev =>
         prev.map(t => (t.id === id ? { ...t, title: newTitle } : t))
@@ -70,7 +75,6 @@ export default function ProjectDetails() {
   async function handleCreateTask(data) {
     try {
       const res = await api.post(`/tasks/kanban`, data);
-
       setTasks(prev => [...prev, res.data]);
     } catch (error) {
       console.error("Error creating task", error);
@@ -88,6 +92,14 @@ export default function ProjectDetails() {
     <div style={{ padding: "2rem" }}>
       <h1>{project.name}</h1>
 
+      {/* Add Task Button */}
+      <button
+        onClick={() => setShowCreateModal(true)}
+        style={{ marginBottom: "1rem" }}
+      >
+        + Add Task
+      </button>
+
       <div
         style={{
           display: "flex",
@@ -95,28 +107,11 @@ export default function ProjectDetails() {
           marginTop: "2rem",
         }}
       >
-        <button
-        onClick={() => {
-         const title = prompt("Task title:");
-          if (!title) return;
-
-          handleCreateTask({
-          title,
-          description: "",
-          status: "pending",
-          projectId,
-          teamId: project.teamId
-          });
-            }}
-             >
-            + Add Task
-           </button>
-
         <TaskColumn
           title="Pending"
           tasks={pending}
           onMove={handleMoveTask}
-          onRename={handleRenameTask}
+          onRename={task => setRenameTask(task)}
           onDelete={handleDeleteTask}
         />
 
@@ -124,7 +119,7 @@ export default function ProjectDetails() {
           title="In Progress"
           tasks={inProgress}
           onMove={handleMoveTask}
-          onRename={handleRenameTask}
+          onRename={task => setRenameTask(task)}
           onDelete={handleDeleteTask}
         />
 
@@ -132,10 +127,29 @@ export default function ProjectDetails() {
           title="Done"
           tasks={done}
           onMove={handleMoveTask}
-          onRename={handleRenameTask}
+          onRename={task => setRenameTask(task)}
           onDelete={handleDeleteTask}
         />
       </div>
+
+      {/* Create Task Modal */}
+      {showCreateModal && (
+        <CreateTaskModal
+          onClose={() => setShowCreateModal(false)}
+          onCreate={handleCreateTask}
+          projectId={projectId}
+          teamId={project.teamId}
+        />
+      )}
+
+      {/* Rename Task Modal */}
+      {renameTask && (
+        <RenameTaskModal
+          task={renameTask}
+          onRename={handleRenameTask}
+          onClose={() => setRenameTask(null)}
+        />
+      )}
     </div>
   );
 }
