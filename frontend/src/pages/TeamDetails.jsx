@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import api from "../api/axios";
 import AddProjectModal from "../components/projects/AddProjectModal";
 import RenameProjectModal from "./RenameProject";
+import { Link } from "react-router-dom";
 export default function TeamDetails() {
   const { teamId } = useParams();
 
@@ -69,12 +70,15 @@ export default function TeamDetails() {
 
       <h2>Projects</h2>
       {projects.map(p => (
-        <div key={p.id}>{p.name}
-        <button onClick={()=> deleteProjects(p.id)}>🗑️</button>
-        <button onClick={()=> {
-          setRenamed(p)
-          setShowRenameModal(true)
-        }}>Edit</button>
+        <div key={p.id}>
+          <Link to={`/projects/${p.id}`} style={{marginRight :'1rem'}}>
+          {p.name}
+          </Link>
+          <button onClick={()=> deleteProjects(p.id)}>🗑️</button>
+          <button onClick={()=>{
+            setRenamed(p)
+            setShowRenameModal(true)
+          }}>✏️</button>
         </div>
       ))}
       {showRenameModal && (

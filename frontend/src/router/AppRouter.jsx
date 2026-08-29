@@ -5,6 +5,7 @@ import ProtectedRoute from "./ProtectedRoute";
 import Dashboard from "../pages/Dashboard";
 import Teams from "../pages/Teams";
 import TeamDetails from "../pages/TeamDetails";
+import ProjectDetails from "../pages/ProjectDetails";
 export default function AppRouter() {
   return (
     <BrowserRouter>
@@ -13,6 +14,7 @@ export default function AppRouter() {
         <Route path="/register" element={<Register />} />
         <Route path="/teams" element={<Teams/>}/>
         <Route path="/teams/:teamId" element={<TeamDetails />}/>
+        <Route path="/projects/:projectId" element={<ProjectDetails />}/>
         <Route
           path="/dashboard"
           element={
