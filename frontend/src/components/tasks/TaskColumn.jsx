@@ -1,4 +1,4 @@
-import TaskCard from "./TaskCard";
+import TaskCard from "./TaskCard"
 
 export default function TaskColumn({title , tasks , onMove , onRename , onDelete}){
     return(

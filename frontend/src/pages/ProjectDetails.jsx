@@ -95,6 +95,23 @@ export default function ProjectDetails() {
           marginTop: "2rem",
         }}
       >
+        <button
+        onClick={() => {
+         const title = prompt("Task title:");
+          if (!title) return;
+
+          handleCreateTask({
+          title,
+          description: "",
+          status: "pending",
+          projectId,
+          teamId: project.teamId
+          });
+            }}
+             >
+            + Add Task
+           </button>
+
         <TaskColumn
           title="Pending"
           tasks={pending}
