@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import api from "../api/axios";
 import AddProjectModal from "../components/projects/AddProjectModal";
+import { useCallback } from "react";
 export default function TeamDetails() {
   const { teamId } = useParams();
 
@@ -9,16 +10,18 @@ export default function TeamDetails() {
   const [members, setMembers] = useState([]);
   const [projects, setProjects] = useState([]);
   const [showProjectModal , setShowProjectModal] = useState(false)
-  async function fetchTeamDetails() {
-    try {
-      const res = await api.get(`/teams/${teamId}`);
-      setTeam(res.data.team);
-      setMembers(res.data.members);
-      setProjects(res.data.projects);
-    } catch (err) {
-      console.log("Error loading team details");
-    }
+
+const fetchTeamDetails = useCallback(async () => {
+  try {
+    const res = await api.get(`/teams/${teamId}`);
+    setTeam(res.data.team);
+    setMembers(res.data.members);
+    setProjects(res.data.projects);
+  } catch (err) {
+    console.log("Error loading team details");
   }
+}, [teamId]);
+
 
   useEffect(() => {
     fetchTeamDetails();
