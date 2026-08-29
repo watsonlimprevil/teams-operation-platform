@@ -36,15 +36,29 @@ export const createProject = async (req: Request, res: Response) => {
   try {
     const { name, teamId } = req.body;
 
+    if (!teamId) {
+      return res.status(400).json({ message: "teamId is required" });
+    }
+
+    const team = await prisma.team.findUnique({
+      where: { id: teamId }
+    });
+
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
+
     const newProject = await prisma.project.create({
-      data: { name, teamId },
+      data: { name, teamId }
     });
 
     res.status(201).json(newProject);
   } catch (error) {
+    console.error("Error creating project:", error);
     res.status(500).json({ message: "Error creating project" });
   }
 };
+
 
 // UPDATE project
 export const updateProject = async (req: Request, res: Response) => {
