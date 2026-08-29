@@ -34,7 +34,8 @@ export const getProjectById = async (req: Request, res: Response) => {
 // CREATE project
 export const createProject = async (req: Request, res: Response) => {
   try {
-    const { name, teamId } = req.body;
+    const { name } = req.body;
+    const teamId = Number(req.body.teamId); // ⭐ FIX
 
     if (!teamId) {
       return res.status(400).json({ message: "teamId is required" });
