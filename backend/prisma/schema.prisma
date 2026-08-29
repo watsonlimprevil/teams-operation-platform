@@ -12,16 +12,20 @@ datasource db {
 ///  * USER MODEL
 ///  * ============================
 model User {
-  id              Int              @id @default(autoincrement())
-  email           String           @unique
-  password        String
-  name            String?
-  createdAt       DateTime         @default(now())
-  teams           UserTeam[]
-  teamMemberships TeamMembership[]
-  tasks Task[]
+  id           Int              @id @default(autoincrement())
+  email        String           @unique
+  password     String
+  name         String?
+  role         String           @default("User")
+  refreshToken String?
+  createdAt    DateTime         @default(now())
 
+  // FIX: Opposite relations
+  userTeams       UserTeam[]
+  teamMemberships TeamMembership[]
+  tasks           Task[]
 }
+
 
 
 /// *
