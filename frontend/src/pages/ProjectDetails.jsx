@@ -5,13 +5,20 @@ import TaskColumn from "../components/tasks/TaskColumn";
 import CreateTaskModal from "../components/tasks/CreateTaskModal";
 import RenameTaskModal from "../components/tasks/RenameTaskModal";
 
+import { DragDropContext } from "@hello-pangea/dnd";
+
 export default function ProjectDetails() {
   const { projectId } = useParams();
 
   const [project, setProject] = useState(null);
-  const [tasks, setTasks] = useState([]);
 
-  // Modal state
+  // Columns stored separately for reordering
+  const [columns, setColumns] = useState({
+    pending: [],
+    "in-progress": [],
+    done: []
+  });
+
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [renameTask, setRenameTask] = useState(null);
 
@@ -32,7 +39,16 @@ export default function ProjectDetails() {
   async function fetchTasks() {
     try {
       const res = await api.get(`/tasks/projects/${projectId}`);
-      setTasks(res.data);
+
+      const pending = res.data.filter(t => t.status === "pending");
+      const inProgress = res.data.filter(t => t.status === "in-progress");
+      const done = res.data.filter(t => t.status === "done");
+
+      setColumns({
+        pending,
+        "in-progress": inProgress,
+        done
+      });
     } catch (error) {
       console.error("Error loading tasks", error);
     }
@@ -41,10 +57,6 @@ export default function ProjectDetails() {
   async function handleMoveTask(id, newStatus) {
     try {
       await api.put(`/tasks/${id}/status`, { status: newStatus });
-
-      setTasks(prev =>
-        prev.map(t => (t.id === id ? { ...t, status: newStatus } : t))
-      );
     } catch (error) {
       console.error("Error moving task", error);
     }
@@ -54,9 +66,17 @@ export default function ProjectDetails() {
     try {
       await api.put(`/tasks/${id}`, { title: newTitle });
 
-      setTasks(prev =>
-        prev.map(t => (t.id === id ? { ...t, title: newTitle } : t))
-      );
+      setColumns(prev => {
+        const updated = { ...prev };
+
+        for (const col in updated) {
+          updated[col] = updated[col].map(t =>
+            t.id === id ? { ...t, title: newTitle } : t
+          );
+        }
+
+        return updated;
+      });
     } catch (error) {
       console.error("Error renaming task", error);
     }
@@ -66,7 +86,15 @@ export default function ProjectDetails() {
     try {
       await api.delete(`/tasks/${id}`);
 
-      setTasks(prev => prev.filter(t => t.id !== id));
+      setColumns(prev => {
+        const updated = { ...prev };
+
+        for (const col in updated) {
+          updated[col] = updated[col].filter(t => t.id !== id);
+        }
+
+        return updated;
+      });
     } catch (error) {
       console.error("Error deleting task", error);
     }
@@ -75,16 +103,57 @@ export default function ProjectDetails() {
   async function handleCreateTask(data) {
     try {
       const res = await api.post(`/tasks/kanban`, data);
-      setTasks(prev => [...prev, res.data]);
+
+      setColumns(prev => ({
+        ...prev,
+        pending: [...prev.pending, res.data]
+      }));
     } catch (error) {
       console.error("Error creating task", error);
     }
   }
 
-  // Split tasks into columns
-  const pending = tasks.filter(t => t.status === "pending");
-  const inProgress = tasks.filter(t => t.status === "in-progress");
-  const done = tasks.filter(t => t.status === "done");
+  // DRAG AND DROP HANDLER
+  function handleDragEnd(result) {
+    const { source, destination, draggableId } = result;
+
+    if (!destination) return;
+
+    const sourceCol = source.droppableId;
+    const destCol = destination.droppableId;
+
+    // Reordering inside same column
+    if (sourceCol === destCol) {
+      const column = Array.from(columns[sourceCol]);
+      const [moved] = column.splice(source.index, 1);
+      column.splice(destination.index, 0, moved);
+
+      setColumns(prev => ({
+        ...prev,
+        [sourceCol]: column
+      }));
+
+      return;
+    }
+
+    // Moving between columns
+    const sourceTasks = Array.from(columns[sourceCol]);
+    const destTasks = Array.from(columns[destCol]);
+
+    const [moved] = sourceTasks.splice(source.index, 1);
+    moved.status = destCol; // update status locally
+
+    destTasks.splice(destination.index, 0, moved);
+
+    setColumns(prev => ({
+      ...prev,
+      [sourceCol]: sourceTasks,
+      [destCol]: destTasks
+    }));
+
+    // Update backend
+    handleMoveTask(Number(draggableId), destCol);
+  }
 
   if (!project) return <p>Loading project...</p>;
 
@@ -92,47 +161,41 @@ export default function ProjectDetails() {
     <div style={{ padding: "2rem" }}>
       <h1>{project.name}</h1>
 
-      {/* Add Task Button */}
-      <button
-        onClick={() => setShowCreateModal(true)}
-        style={{ marginBottom: "1rem" }}
-      >
+      <button onClick={() => setShowCreateModal(true)}>
         + Add Task
       </button>
 
-      <div
-        style={{
-          display: "flex",
-          gap: "2rem",
-          marginTop: "2rem",
-        }}
-      >
-        <TaskColumn
-          title="Pending"
-          tasks={pending}
-          onMove={handleMoveTask}
-          onRename={task => setRenameTask(task)}
-          onDelete={handleDeleteTask}
-        />
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <div style={{ display: "flex", gap: "2rem", marginTop: "2rem" }}>
+          <TaskColumn
+            title="Pending"
+            columnId="pending"
+            tasks={columns.pending}
+            onMove={handleMoveTask}
+            onRename={task => setRenameTask(task)}
+            onDelete={handleDeleteTask}
+          />
 
-        <TaskColumn
-          title="In Progress"
-          tasks={inProgress}
-          onMove={handleMoveTask}
-          onRename={task => setRenameTask(task)}
-          onDelete={handleDeleteTask}
-        />
+          <TaskColumn
+            title="In Progress"
+            columnId="in-progress"
+            tasks={columns["in-progress"]}
+            onMove={handleMoveTask}
+            onRename={task => setRenameTask(task)}
+            onDelete={handleDeleteTask}
+          />
 
-        <TaskColumn
-          title="Done"
-          tasks={done}
-          onMove={handleMoveTask}
-          onRename={task => setRenameTask(task)}
-          onDelete={handleDeleteTask}
-        />
-      </div>
+          <TaskColumn
+            title="Done"
+            columnId="done"
+            tasks={columns.done}
+            onMove={handleMoveTask}
+            onRename={task => setRenameTask(task)}
+            onDelete={handleDeleteTask}
+          />
+        </div>
+      </DragDropContext>
 
-      {/* Create Task Modal */}
       {showCreateModal && (
         <CreateTaskModal
           onClose={() => setShowCreateModal(false)}
@@ -142,7 +205,6 @@ export default function ProjectDetails() {
         />
       )}
 
-      {/* Rename Task Modal */}
       {renameTask && (
         <RenameTaskModal
           task={renameTask}
