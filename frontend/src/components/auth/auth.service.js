@@ -12,14 +12,20 @@ export async function login(email , password){
 }
 
 
-export async function register(name , email, password){
-    const res = await fetch(`${API_URL}/auth/register`,{
-        method: 'POST',
-        credentials : 'include',
-        headers: {'Content-Type' : 'application/json'},
-        body : JSON.stringify({name , email , password})
+export async function register(name, email, password) {
+    const res = await fetch(`${API_URL}/auth/register`, {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email, password }),
     });
-    return res.json()
+
+    const data = await res.json();
+
+    return {
+        ok: res.ok,
+        ...data
+    };
 }
 
 export async function logout(){

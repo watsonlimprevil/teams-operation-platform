@@ -1,6 +1,6 @@
 import { useEffect , useState } from "react";
 import { AutheContext } from "./AutheContext";
-import { login, register, logout, getMe } from "../services/auth.service";
+import { login, register, logout, getMe } from './auth.service';
 
 export function AuthProvider({children}){
     const [user , setUser] = useState([]);
