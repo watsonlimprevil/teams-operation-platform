@@ -14,9 +14,17 @@ export default function Register(){
          const res = await register(name , email , password)
          console.log("RES:", res);
 
-         if(res.message === 'User Registered'){
-            nav('/')
-         }
+        if (!res) {
+    console.log("Registration failed: no response");
+    return;
+}
+
+if (res.ok) {
+    nav('/');
+} else {
+    console.log("Registration failed:", res.message);
+}
+
     };
 
     return(
