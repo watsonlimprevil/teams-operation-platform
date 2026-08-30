@@ -8,24 +8,27 @@ export default function Register(){
     const [email , setEmail] = useState('');
     const [password , setPassword] = useState('');
     const nav = useNavigate()
-    async function handleSubmit(e){
-        
-        e.preventDefault();
-         const res = await register(name , email , password)
-         console.log("RES:", res);
+  
+    console.log("REGISTER FN:", register);
 
-        if (!res) {
-    console.log("Registration failed: no response");
-    return;
+    async function handleSubmit(e) {
+    e.preventDefault();
+
+    const res =  await register(name, email, password);
+    console.log("RES:", res);
+
+    if (!res) {
+        console.log("Registration failed: no response");
+        return;
+    }
+
+    if (res.ok) {
+        nav('/');
+    } else {
+        console.log("Registration failed:", res.message);
+    }
 }
 
-if (res.ok) {
-    nav('/');
-} else {
-    console.log("Registration failed:", res.message);
-}
-
-    };
 
     return(
         <form onSubmit={handleSubmit}>

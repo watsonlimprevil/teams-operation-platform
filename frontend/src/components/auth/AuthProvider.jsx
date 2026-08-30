@@ -24,9 +24,11 @@ export function AuthProvider({children}){
         if(res.user) setUser(res.user);
     }
 
-    async function handleRegister(name , email , password){
-        await register(name , email , password)
-    };
+   async function handleRegister(name , email , password){
+    const res = await register(name , email , password);
+    return res; // <-- THIS is the missing piece
+};
+
 
     async function handleLogout(){
         await logout();
