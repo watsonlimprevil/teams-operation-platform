@@ -1,36 +1,43 @@
 import { Request, Response } from "express";
-import bcrypt from 'bcrypt'
-import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
+import jwt, { SignOptions } from "jsonwebtoken";
 import { prisma } from "../prisma/client";
 
+// REGISTER USER
+export const registerUser = async (req: Request, res: Response) => {
+  try {
+    const { email, password, name } = req.body;
 
-export const registerUser = async(req:Request , res:Response) =>{
-  try{
-    const { email , password , name} = req.body;
-
-    if(!email || !password || !name){
-      return res.status(400).json({message : 'Missing fields'})
+    if (!email || !password || !name) {
+      return res.status(400).json({ message: "Missing fields" });
     }
-    if(password.length < 8){
-      return res.status(400).json({message : 'Password too short'})
-    }
-
-    const existing = await prisma.user.findUnique({where : {email}});
-    if(existing){
-      return res.status(400).json({message : 'Email already in use'})
+    if (password.length < 8) {
+      return res.status(400).json({ message: "Password too short" });
     }
 
-    const hashedPassword = await bcrypt.hash(password , 10);
+    const existing = await prisma.user.findUnique({ where: { email } });
+    if (existing) {
+      return res.status(400).json({ message: "Email already in use" });
+    }
+    console.log("REGISTER BODY:", req.body);
+
+    console.log('before hashing')
+    const hashedPassword = await bcrypt.hash(password, 10);
+    console.log('after hashsing')
     const user = await prisma.user.create({
-      data:{email, password:hashedPassword, name, role: 'User'}
+      data: { email, password: hashedPassword, name, role: "User" },
     });
-    res.status(201).json({message : 'User Registered', user:{id:user.id , email:user.email , name: user.name }})
-  }catch(error){
-    res.status(500).json({message : 'Error registering user'})
+    console.log('after insertion')
+    res.status(201).json({
+      message: "User Registered",
+      user: { id: user.id, email: user.email, name: user.name },
+    });
+  } catch (error) {
+    res.status(500).json({ message: "Error registering user" });
   }
-}
+};
 
-
+// LOGIN USER
 export const loginUser = async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body;
@@ -45,19 +52,27 @@ export const loginUser = async (req: Request, res: Response) => {
       throw new Error("JWT secrets not set");
     }
 
+    // FINAL FIX: Force-cast expiresIn so TS stops complaining
+    const accessTokenOptions: SignOptions = {
+      expiresIn: (process.env.ACCESS_TOKEN_EXPIRES || "15m") as any,
+    };
+
+    const refreshTokenOptions: SignOptions = {
+      expiresIn: (process.env.REFRESH_TOKEN_EXPIRES || "7d") as any,
+    };
+
     const accessToken = jwt.sign(
       { userId: user.id, role: user.role },
       process.env.JWT_ACCESS_SECRET as string,
-      { expiresIn: process.env.ACCESS_TOKEN_EXPIRES || "15m" }
+      accessTokenOptions
     );
 
     const refreshToken = jwt.sign(
       { userId: user.id },
       process.env.JWT_REFRESH_SECRET as string,
-      { expiresIn: process.env.REFRESH_TOKEN_EXPIRES || "7d" }
+      refreshTokenOptions
     );
 
-    // Optionally store refreshToken in DB for revocation
     await prisma.user.update({
       where: { id: user.id },
       data: { refreshToken },
@@ -87,6 +102,7 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
+// LOGOUT USER
 export const logoutUser = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user?.userId;
@@ -109,22 +125,24 @@ export const logoutUser = async (req: Request, res: Response) => {
   }
 };
 
-export const getMe = async(req:Request , res:Response)=>{
-  try{
+// GET AUTHENTICATED USER
+export const getMe = async (req: Request, res: Response) => {
+  try {
     const userId = (req as any).user?.userId;
-    if(!userId) return res.status(401).json({message :  'not Authorized'});
+    if (!userId) return res.status(401).json({ message: "Not authorized" });
 
     const user = await prisma.user.findUnique({
-      where:{id:userId},
-      select: {id:true , email:true , name:true , role:true}
+      where: { id: userId },
+      select: { id: true, email: true, name: true, role: true },
     });
 
-    res.json({user})
-  }catch(error){
-    res.status(500).json({message : 'Error fetching user'})
+    res.json({ user });
+  } catch (error) {
+    res.status(500).json({ message: "Error fetching user" });
   }
-}
+};
 
+// REFRESH TOKEN
 export const refreshTokenHandler = async (req: Request, res: Response) => {
   try {
     const refreshToken = req.cookies?.refreshToken;
@@ -137,7 +155,6 @@ export const refreshTokenHandler = async (req: Request, res: Response) => {
       throw new Error("JWT secrets not set");
     }
 
-    // Verify refresh token
     let decoded: any;
     try {
       decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string);
@@ -145,7 +162,6 @@ export const refreshTokenHandler = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Invalid refresh token" });
     }
 
-    // Check if refresh token matches DB
     const user = await prisma.user.findUnique({
       where: { id: decoded.userId },
     });
@@ -154,21 +170,23 @@ export const refreshTokenHandler = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Refresh token not recognized" });
     }
 
-    // Generate new access token
+    const newAccessTokenOptions: SignOptions = {
+      expiresIn: (process.env.ACCESS_TOKEN_EXPIRES || "15m") as any,
+    };
+
     const newAccessToken = jwt.sign(
       { userId: user.id, role: user.role },
       process.env.JWT_ACCESS_SECRET as string,
-      { expiresIn: process.env.ACCESS_TOKEN_EXPIRES || "15m" }
+      newAccessTokenOptions
     );
 
     const isProd = process.env.NODE_ENV === "production";
 
-    // Set new access token cookie
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: isProd,
       sameSite: "strict",
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 15 * 60 * 1000,
     });
 
     return res.json({ message: "Access token refreshed" });

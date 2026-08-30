@@ -17,6 +17,8 @@
     // Avoid noise from type definitions
     "skipLibCheck": true,
 
+    "strictNullChecks": false,
+
     // Allow TS to compile isolated files (good for Node)
     "isolatedModules": false,
 
