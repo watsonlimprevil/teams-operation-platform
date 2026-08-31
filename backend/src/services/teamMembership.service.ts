@@ -10,7 +10,10 @@ export const addUserToTeamService = async (teamId: number, userId: number) => {
   });
 };
 
-export const removeUserFromTeamService = async (teamId: number, userId: number) => {
+export const removeUserFromTeamService = async (
+  teamId: number,
+  userId: number,
+) => {
   return prisma.teamMembership.deleteMany({
     where: { teamId, userId },
   });
@@ -23,7 +26,11 @@ export const getTeamUsersService = async (teamId: number) => {
   });
 };
 
-export const updateUserRoleService = async (teamId: number, userId: number, role: string) => {
+export const updateUserRoleService = async (
+  teamId: number,
+  userId: number,
+  role: string,
+) => {
   return prisma.teamMembership.updateMany({
     where: { teamId, userId },
     data: { role },

@@ -4,7 +4,7 @@ import {
   loginUser,
   refreshTokenHandler,
   logoutUser,
-  getMe
+  getMe,
 } from "../controllers/auth.controller";
 
 import { authMiddleware } from "../middleware/auth.middleware";

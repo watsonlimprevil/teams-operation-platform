@@ -28,8 +28,8 @@ export const createUser = async (req: Request, res: Response) => {
     data: {
       email,
       name,
-      password: hashedPassword
-    }
+      password: hashedPassword,
+    },
   });
 
   res.status(201).json(newUser);
@@ -55,4 +55,26 @@ export const deleteUser = async (req: Request, res: Response) => {
   await prisma.user.delete({ where: { id } });
 
   res.json({ message: "User deleted" });
+};
+
+export const getPersonalProfile = async (req: Request, res: Response) => {
+  try {
+    const userId = (req as any).user.userId;
+
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        tasks: true,
+        projects: true,
+        memberships: {
+          include: { team: true },
+        },
+      },
+    });
+
+    res.json(user);
+  } catch (err) {
+    console.error("Error fetching profile", err);
+    res.status(500).json({ message: "Failed to load profile" });
+  }
 };

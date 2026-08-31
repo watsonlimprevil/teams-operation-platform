@@ -7,10 +7,10 @@ export const getUserTeams = async (req: Request, res: Response) => {
 
     const memberships = await prisma.teamMembership.findMany({
       where: { userId },
-      include: { team: true }
+      include: { team: true },
     });
 
-    const teams = memberships.map(m => m.team);
+    const teams = memberships.map((m) => m.team);
 
     res.json(teams);
   } catch (err) {
@@ -23,9 +23,10 @@ export const createTeam = async (req: Request, res: Response) => {
   try {
     const userId = (req as any).user.userId;
     const { name } = req.body;
+    console.log("USER:", userId);
 
     const team = await prisma.team.create({
-      data: { name }
+      data: { name },
     });
 
     // Add creator as admin
@@ -33,8 +34,8 @@ export const createTeam = async (req: Request, res: Response) => {
       data: {
         teamId: team.id,
         userId,
-        role: "admin"
-      }
+        role: "admin",
+      },
     });
 
     res.json(team);
@@ -44,30 +45,29 @@ export const createTeam = async (req: Request, res: Response) => {
   }
 };
 
+export const getTeamDetails = async (req: Request, res: Response) => {
+  try {
+    const teamId = Number(req.params.teamId);
 
-export const getTeamDetails = async(req:Request , res:Response) =>{
-    try{
-        const teamId = Number(req.params.teamId);
+    const team = await prisma.team.findUnique({
+      where: { id: teamId },
+    });
 
-        const team =  await prisma.team.findUnique({
-            where : {id : teamId}
-        });
+    const members = await prisma.teamMembership.findMany({
+      where: { teamId },
+      include: { user: true },
+    });
 
-        const members = await prisma.teamMembership.findMany({
-            where : {teamId},
-            include : {user : true}
-        });
+    const projects = await prisma.project.findMany({
+      where: { teamId },
+    });
 
-        const projects = await prisma.project.findMany({
-            where : {teamId}
-        });
-
-        res.json({
-            team, 
-            members,
-            projects
-        })
-    }catch(error){
-        console.error('Error loading team details', error)
-    }
-}
+    res.json({
+      team,
+      members,
+      projects,
+    });
+  } catch (error) {
+    console.error("Error loading team details", error);
+  }
+};
