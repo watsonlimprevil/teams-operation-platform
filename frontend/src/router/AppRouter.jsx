@@ -13,7 +13,7 @@ export default function AppRouter() {
     <BrowserRouter>
       <Routes>
         <Route path="/tasks" element={<TaskColumn/>}></Route>
-        <Route path="/project" element={<Projects/>}></Route>
+        <Route path="/projects" element={<Projects/>}></Route>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/teams" element={<Teams/>}/>
