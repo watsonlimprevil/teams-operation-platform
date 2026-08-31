@@ -19,6 +19,7 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true })); 
 app.use('/tasks' , taskRoutes)
 app.use("/projects", projectRoutes);
 app.use('/team-membership' , teamMembershipRoutes)
