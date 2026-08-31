@@ -7,14 +7,15 @@ export default function Teams() {
   const [teams, setTeams] = useState([]);
   const [showModal, setShowModal] = useState(false);
 
-  async function fetchTeams() {
-    try {
-      const res = await api.get("/teams");
-      setTeams(res.data);
-    } catch (err) {
-      console.log("Error fetching teams");
-    }
+async function fetchTeams() {
+  try {
+    const res = await api.get('/teams');   // ⭐ Correct
+    setTeams(res.data)
+  } catch (err) {
+    console.log("Error fetching teams", err);
   }
+}
+
 
   useEffect(() => {
     fetchTeams();

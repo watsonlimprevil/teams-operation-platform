@@ -54,13 +54,41 @@ export default function ProjectDetails() {
     }
   }
 
-  async function handleMoveTask(id, newStatus) {
-    try {
-      await api.put(`/tasks/${id}/status`, { status: newStatus });
-    } catch (error) {
-      console.error("Error moving task", error);
-    }
+async function handleMoveTask(id, newStatus) {
+  try {
+    await api.put(`/tasks/${id}/status`, { status: newStatus });
+
+    // Update UI immediately
+    setColumns(prev => {
+      const updated = { ...prev };
+
+      // Remove task from all columns
+      for (const col in updated) {
+        updated[col] = updated[col].filter(t => t.id !== id);
+      }
+
+      // Find the moved task from previous state
+      const allTasks = [
+        ...prev.pending,
+        ...prev["in-progress"],
+        ...prev.done
+      ];
+
+      const movedTask = allTasks.find(t => t.id === id);
+
+      if (movedTask) {
+        movedTask.status = newStatus;
+        updated[newStatus].push(movedTask);
+      }
+
+      return updated;
+    });
+  } catch (error) {
+    console.error("Error moving task", error);
   }
+}
+
+
 
   async function handleRenameTask(id, newTitle) {
     try {
