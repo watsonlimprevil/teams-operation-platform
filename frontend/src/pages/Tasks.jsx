@@ -35,8 +35,9 @@ export default function Tasks(){
             <ul style={{marginTop : '1rem'}}>
                 {tasks.map(task => (
                     <li key={task.id} style={{marginBottom: '1rem'}}>
+                        <Link to={`/tasks/${task.id}`}>
                         <strong>{task.title}</strong> - {task.status}
-
+                        </Link>
                         <div style={{marginTop : '0.5rem'}}>
                            <button onClick={() => handleDelete(task.id)} 
                             style={{marginLeft : '1rem'}}
