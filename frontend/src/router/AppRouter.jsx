@@ -14,13 +14,13 @@ export default function AppRouter() {
     <BrowserRouter>
       <Routes>
         <Route path="/tasks/:taskId" element={<TaskDetails />}></Route>
-        <Route path="/tasks" element={<Tasks/>}></Route>
-        <Route path="/projects" element={<Projects/>}></Route>
+        <Route path="/tasks" element={<Tasks />}></Route>
+        <Route path="/projects" element={<Projects />}></Route>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/teams" element={<Teams/>}/>
-        <Route path="/teams/:teamId" element={<TeamDetails />}/>
-        <Route path="/projects/:projectId" element={<ProjectDetails />}/>
+        <Route path="/teams" element={<Teams />} />
+        <Route path="/teams/:teamId" element={<TeamDetails />} />
+        <Route path="/projects/:projectId" element={<ProjectDetails />} />
         <Route
           path="/dashboard"
           element={

@@ -8,35 +8,36 @@ export default function Dashboard() {
   const [data, setData] = useState({
     teams: [],
     projects: [],
-    tasks: []
+    tasks: [],
   });
 
   const [loading, setLoading] = useState(true);
-  const [tasks , setTasks] = useState([])
+  const [tasks, setTasks] = useState([]);
   useEffect(() => {
-    api.get("/dashboard")
-      .then(res => {
+    api
+      .get("/dashboard")
+      .then((res) => {
         setData(res.data);
         setLoading(false);
       })
-      .catch(err => {
+      .catch((err) => {
         console.error("Dashboard load error:", err);
         setLoading(false);
       });
   }, []);
 
-   useEffect(()=>{
-        fetchTasks()
-    },[]);
+  useEffect(() => {
+    fetchTasks();
+  }, []);
 
-    async function fetchTasks(){
-        try{
-            const res = await api.get('/tasks');
-            setTasks(res.data);
-        }catch(error){
-            console.error('Error loading tasks', error)
-        }
+  async function fetchTasks() {
+    try {
+      const res = await api.get("/tasks");
+      setTasks(res.data);
+    } catch (error) {
+      console.error("Error loading tasks", error);
     }
+  }
 
   if (loading) {
     return <p style={{ padding: "2rem" }}>Loading dashboard...</p>;
