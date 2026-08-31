@@ -38,7 +38,6 @@ export default function Tasks(){
                         <strong>{task.title}</strong> - {task.status}
 
                         <div style={{marginTop : '0.5rem'}}>
-                           <Link to={`/tasks/${task.id}`}>View</Link>
                            <button onClick={() => handleDelete(task.id)} 
                             style={{marginLeft : '1rem'}}
                             >
