@@ -84,7 +84,7 @@ export const loginUser = async (req: Request, res: Response) => {
       .cookie("accessToken", accessToken, {
         httpOnly: true,
         secure: isProd,
-        sameSite: "strict",
+        sameSite: "lax",
         maxAge: 15 * 60 * 1000,
       })
       .cookie("refreshToken", refreshToken, {
