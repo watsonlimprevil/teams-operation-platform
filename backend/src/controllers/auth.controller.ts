@@ -90,7 +90,7 @@ export const loginUser = async (req: Request, res: Response) => {
       .cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: isProd,
-        sameSite: "strict",
+        sameSite: "lax",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       })
       .json({
