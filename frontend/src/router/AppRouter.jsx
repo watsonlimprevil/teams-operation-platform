@@ -7,12 +7,12 @@ import Teams from "../pages/Teams";
 import TeamDetails from "../pages/TeamDetails";
 import ProjectDetails from "../pages/ProjectDetails";
 import Projects from "../pages/Projects";
-import TaskColumn from "../components/tasks/TaskColumn";
+import Tasks from "../pages/Tasks";
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/tasks" element={<TaskColumn/>}></Route>
+        <Route path="/tasks" element={<Tasks/>}></Route>
         <Route path="/projects" element={<Projects/>}></Route>
         <Route path="/" element={<Login />} />
         <Route path="/register" element={<Register />} />
