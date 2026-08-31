@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
 import TaskColumn from "../components/tasks/TaskColumn";
 import CreateTaskModal from "../components/tasks/CreateTaskModal";
@@ -9,7 +10,7 @@ import { DragDropContext } from "@hello-pangea/dnd";
 
 export default function ProjectDetails() {
   const { projectId } = useParams();
-
+  const nav = useNavigate()
   const [project, setProject] = useState(null);
 
   // Columns stored separately for reordering
@@ -187,6 +188,8 @@ async function handleMoveTask(id, newStatus) {
 
   return (
     <div style={{ padding: "2rem" }}>
+
+      <button onClick={()=> nav('/dashboard')}>Back to Dashboard</button>
       <h1>{project.name}</h1>
 
       <button onClick={() => setShowCreateModal(true)}>
