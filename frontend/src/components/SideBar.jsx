@@ -12,7 +12,7 @@ export default function Sidebar() {
         padding: "1rem",
         height: "50vh",
         borderRight: "1px solid #ddd",
-        transition: "width 0.2s ease"
+        transition: "width 0.2s ease",
       }}
     >
       <button
@@ -22,7 +22,7 @@ export default function Sidebar() {
           background: "none",
           border: "none",
           cursor: "pointer",
-          fontSize: "1.2rem"
+          fontSize: "1.2rem",
         }}
       >
         {collapsed ? "➡️" : "⬅️"}
@@ -35,13 +35,14 @@ export default function Sidebar() {
           marginTop: "2rem",
           display: "flex",
           flexDirection: "column",
-          gap: "1rem"
+          gap: "1rem",
         }}
       >
         <Link to="/dashboard">{collapsed ? "🏠" : "Dashboard"}</Link>
         <Link to="/teams">{collapsed ? "👥" : "Teams"}</Link>
         <Link to="/projects">{collapsed ? "📁" : "Projects"}</Link>
         <Link to="/tasks">{collapsed ? "📝" : "Tasks"}</Link>
+        <Link to={"/profile"}>{collapsed ? "👤" : "profile"}</Link>
       </nav>
     </div>
   );

@@ -9,10 +9,12 @@ import ProjectDetails from "../pages/ProjectDetails";
 import Projects from "../pages/Projects";
 import Tasks from "../pages/Tasks";
 import TaskDetails from "../pages/TasksDetails";
+import Profile from "../pages/Profile";
 export default function AppRouter() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/profile" element={<Profile />}></Route>
         <Route path="/tasks/:taskId" element={<TaskDetails />}></Route>
         <Route path="/tasks" element={<Tasks />}></Route>
         <Route path="/projects" element={<Projects />}></Route>
