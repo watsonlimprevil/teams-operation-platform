@@ -12,7 +12,7 @@ export default function Dashboard() {
   });
 
   const [loading, setLoading] = useState(true);
-
+  const [tasks , setTasks] = useState([])
   useEffect(() => {
     api.get("/dashboard")
       .then(res => {
@@ -24,6 +24,19 @@ export default function Dashboard() {
         setLoading(false);
       });
   }, []);
+
+   useEffect(()=>{
+        fetchTasks()
+    },[]);
+
+    async function fetchTasks(){
+        try{
+            const res = await api.get('/tasks');
+            setTasks(res.data);
+        }catch(error){
+            console.error('Error loading tasks', error)
+        }
+    }
 
   if (loading) {
     return <p style={{ padding: "2rem" }}>Loading dashboard...</p>;
@@ -59,8 +72,8 @@ export default function Dashboard() {
       <hr />
 
       <h3>Your Tasks</h3>
-      {data.tasks.length === 0 && <p>No tasks yet.</p>}
-      {data.tasks.map((task) => (
+      {tasks.length === 0 && <p>No tasks yet.</p>}
+      {tasks.map((task) => (
         <div key={task.id}>
           <strong>{task.title}</strong> — {task.status}
         </div>
