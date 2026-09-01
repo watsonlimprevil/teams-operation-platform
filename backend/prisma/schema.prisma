@@ -12,19 +12,19 @@ datasource db {
 ///  * USER MODEL
 ///  * ============================
 model User {
-  id           Int              @id @default(autoincrement())
-  email        String           @unique
-  password     String
-  name         String?
-  role         String           @default("User")
-  refreshToken String?
-  createdAt    DateTime         @default(now())
+  id        Int @id @default(autoincrement())
+  email     String @unique
+  name      String
+  password  String
 
-  // FIX: Opposite relations
-  userTeams       UserTeam[]
-  teamMemberships TeamMembership[]
-  tasks           Task[]
+  memberships TeamMembership[]
+  tasks       Task[]
+  projects    Project[]
+
+  // Missing relation
+  userTeams   UserTeam[]
 }
+
 
 
 
@@ -84,7 +84,11 @@ model Task {
   id        Int      @id @default(autoincrement())
   title     String
   status    String
-  userId    Int?
 
-  user User? @relation(fields: [userId], references: [id])
+  userId    Int?
+  user      User? @relation(fields: [userId], references: [id])
+
+  // Missing fields
+  projectId Int?
+  project   Project? @relation(fields: [projectId], references: [id])
 }

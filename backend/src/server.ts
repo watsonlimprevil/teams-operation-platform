@@ -5,7 +5,7 @@ import teamMembershipRoutes from "./routes/teamMembership.routes";
 import authRoutes from "./routes/auth.routes";
 import { errorMiddleware } from "./middleware/error.middleware";
 import dasboardRoutes from "./routes/dashboard.routes";
-import userRouter from "./routes/user.Routes";
+import userRoutes from "./routes/user.Routes";
 import teamRoutes from "./routes/team.routes";
 import cors from "cors";
 import dotenv from "dotenv";
@@ -29,7 +29,7 @@ app.use("/team-membership", teamMembershipRoutes);
 app.use("/auth", authRoutes);
 app.use("/dashboard", dasboardRoutes);
 app.use("/teams", teamRoutes);
-app.use("/users", userRouter);
+app.use("/users", userRoutes);
 app.use(errorMiddleware);
 
 app.listen(3001, () => console.log("Server running on port 3001"));

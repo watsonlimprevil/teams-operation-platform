@@ -13,8 +13,7 @@ import { authMiddleware } from "../middleware/auth.middleware";
 const router = Router();
 
 router.get("/", getUsers);
-router.get("/me", getPersonalProfile);
-router.get("");
+router.get("/me", authMiddleware, getPersonalProfile);
 router.get("/:id", getUserById);
 router.post("/", createUser);
 router.put("/:id", updateUser);
