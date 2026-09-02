@@ -105,7 +105,7 @@ export const getTasksByProject = async (req: Request, res: Response) => {
 
     const tasks = await prisma.task.findMany({
       where: { projectId },
-      orderBy: { createdAt: "asc" },
+      orderBy: { id: "desc" },
     });
 
     res.json(tasks);

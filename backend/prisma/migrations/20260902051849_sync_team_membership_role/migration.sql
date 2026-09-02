@@ -1,0 +1,2 @@
+-- This migration intentionally left empty.
+-- Database and schema are already in sync.
