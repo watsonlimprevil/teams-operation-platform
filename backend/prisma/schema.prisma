@@ -17,13 +17,14 @@ model User {
   name     String
   password String
 
+  role     String @default("user")   // ← ADD THIS
+
   memberships TeamMembership[]
   tasks       Task[]
   projects    Project[]
-
-  // Missing relation
-  userTeams UserTeam[]
+  userTeams   UserTeam[]
 }
+
 
 /// *
 ///  * ============================
