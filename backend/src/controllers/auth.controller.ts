@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import jwt, { SignOptions } from "jsonwebtoken";
+import * as jwt from "jsonwebtoken";
+
 import { prisma } from "../prisma/client";
 
 // REGISTER USER
@@ -70,13 +71,12 @@ export const loginUser = async (req: Request, res: Response) => {
       data: { refreshToken },
     });
 
-    // IMPORTANT: localhost cookie rules
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
-      secure: false, // must be false on localhost
-      sameSite: "none", // required for cross-site cookies
+      secure: false,
+      sameSite: "none",
       maxAge: 15 * 60 * 1000,
-      path: "/", // ensures cookie is sent everywhere
+      path: "/",
     });
 
     res.cookie("refreshToken", refreshToken, {
@@ -151,6 +151,7 @@ export const getMe = async (req: Request, res: Response) => {
 };
 
 // REFRESH TOKEN
+// REFRESH TOKEN
 export const refreshTokenHandler = async (req: Request, res: Response) => {
   try {
     const refreshToken = req.cookies?.refreshToken;
@@ -181,14 +182,11 @@ export const refreshTokenHandler = async (req: Request, res: Response) => {
       return res.status(401).json({ message: "Refresh token not recognized" });
     }
 
-    const newAccessTokenOptions: SignOptions = {
-      expiresIn: (process.env.ACCESS_TOKEN_EXPIRES || "15m") as any,
-    };
-
+    // FIXED: remove SignOptions entirely
     const newAccessToken = jwt.sign(
       { userId: user.id, role: user.role },
       process.env.JWT_ACCESS_SECRET as string,
-      newAccessTokenOptions,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRES || "15m" },
     );
 
     const isProd = process.env.NODE_ENV === "production";
