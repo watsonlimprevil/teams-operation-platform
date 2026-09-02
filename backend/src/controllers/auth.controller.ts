@@ -21,13 +21,13 @@ export const registerUser = async (req: Request, res: Response) => {
     }
     console.log("REGISTER BODY:", req.body);
 
-    console.log('before hashing')
+    console.log("before hashing");
     const hashedPassword = await bcrypt.hash(password, 10);
-    console.log('after hashsing')
+    console.log("after hashsing");
     const user = await prisma.user.create({
       data: { email, password: hashedPassword, name, role: "User" },
     });
-    console.log('after insertion')
+    console.log("after insertion");
     res.status(201).json({
       message: "User Registered",
       user: { id: user.id, email: user.email, name: user.name },
@@ -46,31 +46,23 @@ export const loginUser = async (req: Request, res: Response) => {
     if (!user) return res.status(400).json({ message: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    if (!isMatch)
+      return res.status(400).json({ message: "Invalid credentials" });
 
     if (!process.env.JWT_ACCESS_SECRET || !process.env.JWT_REFRESH_SECRET) {
       throw new Error("JWT secrets not set");
     }
 
-    // FINAL FIX: Force-cast expiresIn so TS stops complaining
-    const accessTokenOptions: SignOptions = {
-      expiresIn: (process.env.ACCESS_TOKEN_EXPIRES || "15m") as any,
-    };
-
-    const refreshTokenOptions: SignOptions = {
-      expiresIn: (process.env.REFRESH_TOKEN_EXPIRES || "7d") as any,
-    };
-
     const accessToken = jwt.sign(
       { userId: user.id, role: user.role },
-      process.env.JWT_ACCESS_SECRET as string,
-      accessTokenOptions
+      process.env.JWT_ACCESS_SECRET,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRES || "15m" },
     );
 
     const refreshToken = jwt.sign(
       { userId: user.id },
-      process.env.JWT_REFRESH_SECRET as string,
-      refreshTokenOptions
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: process.env.REFRESH_TOKEN_EXPIRES || "7d" },
     );
 
     await prisma.user.update({
@@ -78,26 +70,34 @@ export const loginUser = async (req: Request, res: Response) => {
       data: { refreshToken },
     });
 
-    const isProd = process.env.NODE_ENV === "production";
+    // IMPORTANT: localhost cookie rules
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: false, // must be false on localhost
+      sameSite: "none", // required for cross-site cookies
+      maxAge: 15 * 60 * 1000,
+      path: "/", // ensures cookie is sent everywhere
+    });
 
-    res
-      .cookie("accessToken", accessToken, {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: "lax",
-        maxAge: 15 * 60 * 1000,
-      })
-      .cookie("refreshToken", refreshToken, {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: "lax",
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      })
-      .json({
-        message: "Login successful",
-        user: { id: user.id, email: user.email, name: user.name, role: user.role },
-      });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: "none",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+      path: "/",
+    });
+
+    res.json({
+      message: "Login successful",
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        role: user.role,
+      },
+    });
   } catch (error) {
+    console.error("Login error:", error);
     res.status(500).json({ message: "Error logging in" });
   }
 };
@@ -117,8 +117,16 @@ export const logoutUser = async (req: Request, res: Response) => {
     const isProd = process.env.NODE_ENV === "production";
 
     res
-      .clearCookie("accessToken", { httpOnly: true, secure: isProd, sameSite: "strict" })
-      .clearCookie("refreshToken", { httpOnly: true, secure: isProd, sameSite: "strict" })
+      .clearCookie("accessToken", {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: "strict",
+      })
+      .clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: "strict",
+      })
       .json({ message: "Logged out" });
   } catch (error) {
     res.status(500).json({ message: "Error logging out" });
@@ -157,7 +165,10 @@ export const refreshTokenHandler = async (req: Request, res: Response) => {
 
     let decoded: any;
     try {
-      decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET as string);
+      decoded = jwt.verify(
+        refreshToken,
+        process.env.JWT_REFRESH_SECRET as string,
+      );
     } catch (error) {
       return res.status(401).json({ message: "Invalid refresh token" });
     }
@@ -177,7 +188,7 @@ export const refreshTokenHandler = async (req: Request, res: Response) => {
     const newAccessToken = jwt.sign(
       { userId: user.id, role: user.role },
       process.env.JWT_ACCESS_SECRET as string,
-      newAccessTokenOptions
+      newAccessTokenOptions,
     );
 
     const isProd = process.env.NODE_ENV === "production";

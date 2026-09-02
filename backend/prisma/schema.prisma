@@ -12,21 +12,18 @@ datasource db {
 ///  * USER MODEL
 ///  * ============================
 model User {
-  id        Int @id @default(autoincrement())
-  email     String @unique
-  name      String
-  password  String
+  id       Int    @id @default(autoincrement())
+  email    String @unique
+  name     String
+  password String
 
   memberships TeamMembership[]
   tasks       Task[]
   projects    Project[]
 
   // Missing relation
-  userTeams   UserTeam[]
+  userTeams UserTeam[]
 }
-
-
-
 
 /// *
 ///  * ============================
@@ -42,53 +39,57 @@ model Team {
   tasks           Task[]
 }
 
-
 /// *
 ///  * ============================
 ///  * USER ↔ TEAM JOIN TABLE
 ///  * ============================
 model UserTeam {
-  id      Int   @id @default(autoincrement())
-  userId  Int
-  teamId  Int
+  id     Int @id @default(autoincrement())
+  userId Int
+  teamId Int
 
   user User @relation(fields: [userId], references: [id])
   team Team @relation(fields: [teamId], references: [id])
 }
 
 model TeamMembership {
-  id      Int   @id @default(autoincrement())
-  userId  Int
-  teamId  Int
+  id     Int @id @default(autoincrement())
+  userId Int
+  teamId Int
 
   user User @relation(fields: [userId], references: [id])
   team Team @relation(fields: [teamId], references: [id])
 }
 
-
 model Project {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   name      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  teamId    Int?
-  team      Team?     @relation(fields: [teamId], references: [id])
+  teamId Int?
+  team   Team? @relation(fields: [teamId], references: [id])
 
-  tasks     Task[]    // <-- added
+  // ADD THESE TWO LINES
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id])
+
+  tasks Task[]
 }
 
-
-
 model Task {
-  id        Int      @id @default(autoincrement())
-  title     String
-  status    String
+  id     Int    @id @default(autoincrement())
+  title  String
+  status String
 
-  userId    Int?
-  user      User? @relation(fields: [userId], references: [id])
+  userId Int?
+  user   User? @relation(fields: [userId], references: [id])
 
-  // Missing fields
+  // ADD THESE TWO LINES
+  teamId Int?
+  team   Team? @relation(fields: [teamId], references: [id])
+
+  // You already added this earlier
   projectId Int?
   project   Project? @relation(fields: [projectId], references: [id])
 }
