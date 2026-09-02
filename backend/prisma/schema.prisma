@@ -53,13 +53,15 @@ model UserTeam {
 }
 
 model TeamMembership {
-  id     Int @id @default(autoincrement())
-  userId Int
-  teamId Int
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  teamId    Int
+  role      String   @default("member")
 
-  user User @relation(fields: [userId], references: [id])
-  team Team @relation(fields: [teamId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
+  team      Team     @relation(fields: [teamId], references: [id])
 }
+
 
 model Project {
   id        Int      @id @default(autoincrement())
