@@ -49,9 +49,12 @@ export const createTask = async (req: Request, res: Response) => {
     const newTask = await prisma.task.create({
       data: {
         title,
-        projectId: Number(projectId),
-        assignedTo: assignedTo || null,
-        teamId: Number(teamId),
+        status: "pending", // REQUIRED FIELD
+        project: { connect: { id: Number(projectId) } },
+        team: { connect: { id: Number(teamId) } },
+        assignedUser: assignedTo
+          ? { connect: { id: Number(assignedTo) } }
+          : undefined,
       },
     });
 

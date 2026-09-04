@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import bcrypt from "bcrypt";
-import * as jwt from "jsonwebtoken";
+import jwt = require("jsonwebtoken");
 
 import { prisma } from "../prisma/client";
 
@@ -56,14 +56,14 @@ export const loginUser = async (req: Request, res: Response) => {
 
     const accessToken = jwt.sign(
       { userId: user.id, role: user.role },
-      process.env.JWT_ACCESS_SECRET,
-      { expiresIn: process.env.ACCESS_TOKEN_EXPIRES || "15m" },
+      process.env.JWT_ACCESS_SECRET as string,
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRES || "15m" } as any,
     );
 
     const refreshToken = jwt.sign(
       { userId: user.id },
-      process.env.JWT_REFRESH_SECRET,
-      { expiresIn: process.env.REFRESH_TOKEN_EXPIRES || "7d" },
+      process.env.JWT_REFRESH_SECRET as string,
+      { expiresIn: process.env.REFRESH_TOKEN_EXPIRES || "7d" } as any,
     );
 
     await prisma.user.update({
@@ -186,7 +186,7 @@ export const refreshTokenHandler = async (req: Request, res: Response) => {
     const newAccessToken = jwt.sign(
       { userId: user.id, role: user.role },
       process.env.JWT_ACCESS_SECRET as string,
-      { expiresIn: process.env.ACCESS_TOKEN_EXPIRES || "15m" },
+      { expiresIn: process.env.ACCESS_TOKEN_EXPIRES || "15m" } as any,
     );
 
     const isProd = process.env.NODE_ENV === "production";

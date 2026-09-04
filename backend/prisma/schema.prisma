@@ -12,20 +12,21 @@ datasource db {
 ///  * USER MODEL
 ///  * ============================
 model User {
-  id       Int    @id @default(autoincrement())
-  email    String @unique
-  name     String
-  password String
-
-  role     String @default("user")   // ← ADD THIS
-
-  memberships TeamMembership[]
-  tasks       Task[]
-  projects    Project[]
-  userTeams   UserTeam[]
-  createdAt DateTime @default(now())
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  name         String
+  password     String
+  role         String   @default("user")
+  createdAt    DateTime @default(now())
   refreshToken String?
 
+  memberships  TeamMembership[]
+  projects     Project[]
+  userTeams    UserTeam[]
+
+  // Correct relations:
+  tasksCreated   Task[] @relation("TaskCreator")
+  tasksAssigned  Task[] @relation("TaskAssignee")
 }
 
 
@@ -83,23 +84,23 @@ model Project {
 
   tasks Task[]
 }
-
 model Task {
-  id     Int    @id @default(autoincrement())
-  title  String
-  status String
+  id            Int      @id @default(autoincrement())
+  title         String
+  status        String
 
-  userId Int?
-  user   User? @relation(fields: [userId], references: [id])
+  userId        Int?
+  user          User? @relation("TaskCreator", fields: [userId], references: [id])
 
-  // ADD THESE TWO LINES
-  teamId Int?
-  team   Team? @relation(fields: [teamId], references: [id])
+  assignedTo    Int?
+  assignedUser  User? @relation("TaskAssignee", fields: [assignedTo], references: [id])
 
-  // You already added this earlier
-  projectId Int?
-  project   Project? @relation(fields: [projectId], references: [id])
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  projectId     Int?
+  project       Project? @relation(fields: [projectId], references: [id])
 
+  teamId        Int?
+  team          Team? @relation(fields: [teamId], references: [id])
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }
